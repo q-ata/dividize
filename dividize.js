@@ -105,14 +105,31 @@
                 return $(this).html();
             }).get(); //get values
 
+            var trs = $self.children('tr');
+            trs = trs.add($self.children('tbody, thead').children('tr'));
+
+            var proceed = false;
+            trs.each(function (tr) {
+                var tds = $(this).children('td, ' + settings.customHeaderTarget);
+                tds.each(function (td) {
+                    var borderColor = $(this)[0].style["border-color"];
+                    if (borderColor === "rgb(255, 255, 255)" || borderColor === "currentcolor") proceed = true;
+                });
+            });
+            if (!proceed) {
+                $self.css({
+                    width: "auto"
+                });
+                $self.removeAttr("width");
+                return $self;
+            }
+
             if (settings.removeHeaders) {
                 $th.closest('tr').remove(); //remove the headers
             }
 
             var $table = $('<div>').addClass('dvdz-box').addClass(settings.classes); //our table replacement
 
-            var trs = $self.children('tr');
-            trs = trs.add($self.children('tbody, thead').children('tr'));
             var rowCount = trs.length; //add/first last row tags
             trs.each(function (i) { //iterate table rows
 
@@ -121,6 +138,12 @@
                 .addClass('dvdz-row')
                 .addClass('dvdz-row-' + i)
                 .appendTo($table);
+                $row.css({
+                    "display": "flex",
+                    "width": "100%",
+                    "justify-content": "space-between",
+                    "flex-wrap": "wrap"
+                })
 
                 if (settings.enableAltRows) { //add alternating row classes
                     $row.addClass((i % 2) === 0 ? 'even' : 'odd');
@@ -152,9 +175,8 @@
                     if (settings.preserveDim) { //preserve cell dimensions
                         $cell.addClass('dvdz-dim-cell');
                         $cell.css({
-                            'line-height'       : $(el).outerHeight() + 'px',
                             'min-height'        : $(el).outerHeight() + 'px',
-                            'width'             : $(el).outerWidth() + 'px',
+                            'min-width'             : "auto"
                         });
                     }
 
